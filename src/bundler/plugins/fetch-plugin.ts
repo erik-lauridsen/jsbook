@@ -10,7 +10,7 @@ export const fetchPlugin = (inputCode: string) => {
   return {
     name: 'fetch-plugin',
     setup(build: esbuild.PluginBuild) {
-      build.onLoad({ filter: /(^index\.js)/ }, (args: any) => {
+      build.onLoad({ filter: /(^index\.js$)/ }, (args: any) => {
         return {
           loader: 'jsx',
           contents: inputCode,
@@ -18,8 +18,7 @@ export const fetchPlugin = (inputCode: string) => {
       });
 
       build.onLoad({ filter: /.*/ }, async (args: any) => {
-        const cachedResult: esbuild.OnLoadResult | null =
-          await fileCache.getItem<esbuild.OnLoadResult>(args.path);
+        const cachedResult = await fileCache.getItem<esbuild.OnLoadResult>(args.path);
         if (cachedResult) {
           return cachedResult;
         }
@@ -27,35 +26,30 @@ export const fetchPlugin = (inputCode: string) => {
 
       build.onLoad({ filter: /.css$/ }, async (args: any) => {
         const { data, request } = await axios.get(args.path);
-        const url = new URL('./', request.responseURL).pathname;
-        const escaped = data
-          .replace(/\n/g, '')
-          .replace(/"/g, '\\"')
-          .replace(/'/g, "\\'");
+        const escaped = data.replace(/\n/g, '').replace(/"/g, '\\"').replace(/'/g, "\\'");
 
         const contents = `
           const style = document.createElement('style');
-          style.innerText = \`${escaped}\`;
+          style.innerText = '${escaped}';
           document.head.appendChild(style);
           `;
         const result: esbuild.OnLoadResult = {
           loader: 'jsx',
           contents: contents,
-          resolveDir: url,
+          resolveDir: new URL('./', request.responseURL).pathname,
         };
-        await fileCache.setItem<esbuild.OnLoadResult>(args.path, result);
+        await fileCache.setItem(args.path, result);
         return result;
       });
 
       build.onLoad({ filter: /.*/ }, async (args: any) => {
         const { data, request } = await axios.get(args.path);
-        const url = new URL('./', request.responseURL).pathname;
         const result: esbuild.OnLoadResult = {
           loader: 'jsx',
           contents: data,
-          resolveDir: url,
+          resolveDir: new URL('./', request.responseURL).pathname,
         };
-        await fileCache.setItem<esbuild.OnLoadResult>(args.path, result);
+        await fileCache.setItem(args.path, result);
         return result;
       });
     },

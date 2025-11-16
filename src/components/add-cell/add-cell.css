@@ -1,0 +1,43 @@
+.add-cell {
+  position: relative;
+  opacity: 0;
+  transition: opacity 0.3s ease-in;
+  transition-delay: 0.2s;
+  margin: 10px 0px;
+}
+
+.add-cell.force-visible {
+  opacity: 1;
+}
+
+.add-cell:hover {
+  opacity: 1;
+}
+
+.add-cell:hover > .add-cell-divider {
+  opacity: 1;
+}
+
+.add-cell-divider {
+  position: absolute;
+  top: 50%;
+  bottom: 50%;
+  right: 2.5%;
+  left: 2.55%;
+  border-bottom: 1px solid gray;
+  width: 95%;
+  z-index: -1;
+}
+
+.add-cell-divider:hover {
+  opacity: 1;
+}
+
+.add-cell .add-buttons {
+  display: flex;
+  justify-content: center;
+}
+
+.add-cell .add-buttons button {
+  margin: 0 30px;
+}
